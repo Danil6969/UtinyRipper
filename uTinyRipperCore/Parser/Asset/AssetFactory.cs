@@ -66,6 +66,8 @@ namespace uTinyRipper
 					return new QualitySettings(assetInfo);
 				case ClassIDType.Shader:
 					return new Shader(assetInfo);
+				case ClassIDType.ComputeShader:
+					return new ComputeShader(assetInfo);
 				case ClassIDType.TextAsset:
 					return new TextAsset(assetInfo);
 				case ClassIDType.Rigidbody2D:
