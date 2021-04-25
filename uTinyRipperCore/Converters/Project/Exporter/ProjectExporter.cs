@@ -140,6 +140,7 @@ namespace uTinyRipper.Converters
 			OverrideYamlExporter(ClassIDType.TerrainLayer);
 
 			OverrideBinaryExporter(ClassIDType.Shader);
+			OverrideBinaryExporter(ClassIDType.ComputeShader);
 			OverrideBinaryExporter(ClassIDType.AudioClip);
 
 			OverrideExporter(ClassIDType.MonoScript, ScriptExporter);
