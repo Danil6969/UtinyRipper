@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using uTinyRipper;
 using uTinyRipper.Classes;
 using uTinyRipper.Classes.Shaders;
@@ -23,10 +24,38 @@ namespace uTinyRipperGUI.Exporters
 
 		public bool Export(IExportContainer container, Object asset, string path)
 		{
+			Shader shader = (Shader)asset;
 			using (Stream fileStream = FileUtils.CreateVirtualFile(path))
 			{
-				Shader shader = (Shader)asset;
 				shader.ExportBinary(container, fileStream, ShaderExporterInstantiator);
+			}
+
+			if (shader.Blobs.Length != 1) return true;
+			int index = path.LastIndexOf(".");
+			string subPath = path.Substring(0,index);
+			if (!DirectoryUtils.Exists(subPath))
+			{
+				DirectoryUtils.CreateVirtualDirectory(subPath);
+			}
+
+			ShaderSubProgram[] subprograms = shader.Blobs[0].SubPrograms;
+			for (int i = 0; i < subprograms.Length; ++i)
+			{
+				string compiledPath = Path.Combine(subPath, $"Subprogram{i:D}.o");
+				ShaderSubProgram subprogram = subprograms[i];
+				byte[] bytes = subprogram.ProgramData;
+				char[] chars = new char[bytes.Length];
+				for (int j = 0; j < bytes.Length; ++j)
+				{
+					chars[j] = (char)bytes[j];
+				}
+				using (Stream fileStream = FileUtils.CreateVirtualFile(compiledPath))
+				{
+					using (StreamWriter writer = new InvariantStreamWriter(fileStream, new UTF8Encoding(false)))
+					{
+						writer.Write(chars);
+					}
+				}
 			}
 			return true;
 		}
@@ -73,7 +102,7 @@ namespace uTinyRipperGUI.Exporters
 
 				case GPUPlatform.d3d11_9x:
 				case GPUPlatform.d3d11:
-					return new ShaderHLSLccExporter(graphicApi);
+					return new ShaderDXExporter(graphicApi);
 
 				case GPUPlatform.vulkan:
 					return new ShaderVulkanExporter();
