@@ -208,6 +208,44 @@ namespace uTinyRipper.Classes
 			}
 		}
 
+		public void ExportSubprograms(string path)
+		{
+			if (Blobs.Length != 1) return;
+
+			string fileName = Path.GetFileName(path);
+			int index = fileName.LastIndexOf(".");
+			if (index != -1)
+			{
+				index = path.LastIndexOf(".");
+				path = path.Substring(0, index);
+			}
+
+			if (!DirectoryUtils.Exists(path))
+			{
+				DirectoryUtils.CreateVirtualDirectory(path);
+			}
+
+			ShaderSubProgram[] subprograms = Blobs[0].SubPrograms;
+			for (int i = 0; i < subprograms.Length; ++i)
+			{
+				string subPath = Path.Combine(path, $"Subprogram{i:D}.o");
+				ShaderSubProgram subprogram = subprograms[i];
+				byte[] bytes = subprogram.ProgramData;
+				char[] chars = new char[bytes.Length];
+				for (int j = 0; j < bytes.Length; ++j)
+				{
+					chars[j] = (char)bytes[j];
+				}
+				using (Stream fileStream = FileUtils.CreateVirtualFile(subPath))
+				{
+					using (StreamWriter writer = new InvariantStreamWriter(fileStream, new UTF8Encoding(false)))
+					{
+						writer.Write(chars);
+					}
+				}
+			}
+		}
+
 		public override IEnumerable<PPtr<Object>> FetchDependencies(DependencyContext context)
 		{
 			foreach (PPtr<Object> asset in base.FetchDependencies(context))
