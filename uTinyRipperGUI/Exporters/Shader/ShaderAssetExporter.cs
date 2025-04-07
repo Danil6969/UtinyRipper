@@ -29,34 +29,7 @@ namespace uTinyRipperGUI.Exporters
 			{
 				shader.ExportBinary(container, fileStream, ShaderExporterInstantiator);
 			}
-
-			if (shader.Blobs.Length != 1) return true;
-			int index = path.LastIndexOf(".");
-			string subPath = path.Substring(0,index);
-			if (!DirectoryUtils.Exists(subPath))
-			{
-				DirectoryUtils.CreateVirtualDirectory(subPath);
-			}
-
-			ShaderSubProgram[] subprograms = shader.Blobs[0].SubPrograms;
-			for (int i = 0; i < subprograms.Length; ++i)
-			{
-				string compiledPath = Path.Combine(subPath, $"Subprogram{i:D}.o");
-				ShaderSubProgram subprogram = subprograms[i];
-				byte[] bytes = subprogram.ProgramData;
-				char[] chars = new char[bytes.Length];
-				for (int j = 0; j < bytes.Length; ++j)
-				{
-					chars[j] = (char)bytes[j];
-				}
-				using (Stream fileStream = FileUtils.CreateVirtualFile(compiledPath))
-				{
-					using (StreamWriter writer = new InvariantStreamWriter(fileStream, new UTF8Encoding(false)))
-					{
-						writer.Write(chars);
-					}
-				}
-			}
+			shader.ExportSubprograms(path);
 			return true;
 		}
 
